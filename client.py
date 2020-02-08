@@ -1,6 +1,9 @@
 from graphics import *
 from socket import AF_INET, socket, SOCK_STREAM
 from time import sleep
+from threading import Thread
+
+RECIEVED = []
 
 def main():
 	win = GraphWin("Chat client", 600, 600)
@@ -61,8 +64,12 @@ def chatWin(username):
 	server.connect((host, port))
 	server.send(bytes(username, "utf8"))
 	returnMsg = server.recv(1024).decode()
+	RECIEVED.append(returnMsg)
 
-	win = GraphWin("Chat client", 600, 600)
+	if returnMsg == "This name is already in use, please try a different one!":
+		exit()
+
+	win = GraphWin("Chat client", 600, 600, autoflush=False)
 	win.setBackground(color_rgb(108, 86, 120))
 
 	msgBox = Rectangle(Point(50, 50), Point(550, 500))
@@ -81,12 +88,58 @@ def chatWin(username):
 	msgSendText = Text(Point(443, 519), "Send")
 	msgSendText.draw(win)
 
-	
+	oldRecieved = RECIEVED.copy()
+
+	Thread(target=waitForMsg, args=(server,)).start()
+
+	while True:
+		update(10)
+		if checkSend(win):
+			if msgEntry.getText() == "":
+				pass
+			else:
+				server.send(bytes(msgEntry.getText(), "utf8"))
+				if msgEntry.getText() == "!quit":
+					break
+				else:
+					msgEntry.setText("")
+
+		if oldRecieved == RECIEVED:
+			pass
+		else:
+			try:
+				newMsg.undraw()
+			except:
+				pass
+			oldRecieved = RECIEVED.copy()
+			newMsg = Text(Point(300, 300), RECIEVED[-1])
+			newMsg.draw(win)
 
 
+
+	win.close()
 	server.close()
 
+def checkSend(win):
+	if win.checkKey() == "Return":
+		return True
 
+	mouse = win.checkMouse()
+	if mouse:
+		if mouse.getX() >= 415 and mouse.getX() <= 470 and mouse.getY() >= 508 and mouse.getY() <= 531:
+			return True
+
+	return False
+
+def waitForMsg(server):
+	while True:
+		msg = server.recv(1024).decode()
+		if msg == "":
+			continue
+		else:
+			RECIEVED.append(msg)
+			if len(RECIEVED) > 10:
+				RECIEVED.pop(0)
 
 if __name__ == "__main__":
 	main()

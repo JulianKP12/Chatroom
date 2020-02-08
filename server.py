@@ -54,8 +54,10 @@ def handleClient(server, person):
 	del CLIENTS[person.name]
 
 def broadcast(message):
-	for client in CLIENTS:
-		client.client.send(bytes(message, "utf8"))
+	print("[SENDING] Sending recieved message to all connections")
+	for name in CLIENTS:
+		CLIENTS[name].client.send(bytes(message, "utf8"))
+	print("[SENDING] Sent message to all connections")
 
 if __name__ == "__main__":
 	acceptThread = Thread(target=waitForCon, args=(server,))
