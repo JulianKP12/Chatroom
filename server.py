@@ -10,6 +10,8 @@ server = socket(AF_INET, SOCK_STREAM)
 server.bind((host, port))
 print("[DEBUG] Server started")
 
+CLIENTS["Server"] = Connection("server", "Server", ("123.12.1.12", 69420))
+
 
 def waitForCon(server):
 	server.listen(5)
@@ -32,7 +34,8 @@ def waitForCon(server):
 
 
 def handleClient(server, person):
-	person.client.send(bytes("Hi there! To leave, type \'!quit\'", "utf8"))
+	person.client.send(bytes("Server: Hi there! To leave, type \'!quit\'", "utf8"))
+	broadcast(f"Server: {person.name} has joined the chat!")
 
 	while True:
 		try:
@@ -45,18 +48,22 @@ def handleClient(server, person):
 					broadcast(f"{person.name}: {msg}")
 			else:
 				print(f"[CONNECTION] Connection from {person.addr[0]} closed by {person.name}")
+				del CLIENTS[person.name]
+				broadcast(f"Server: {person.name} has left the chat!")
 				break
 		except ConnectionResetError as e:
 			print(f"[CONNECTION] Connection from {person.addr[0]} closed by {person.name}")
+			del CLIENTS[person.name]
+			broadcast(f"Server: {person.name} has left the chat!")
 			break
 
 	person.client.close()
-	del CLIENTS[person.name]
 
 def broadcast(message):
 	print("[SENDING] Sending recieved message to all connections")
 	for name in CLIENTS:
-		CLIENTS[name].client.send(bytes(message, "utf8"))
+		if name != "Server":
+			CLIENTS[name].client.send(bytes(message, "utf8"))
 	print("[SENDING] Sent message to all connections")
 
 if __name__ == "__main__":

@@ -72,7 +72,7 @@ def chatWin(username):
 	win = GraphWin("Chat client", 600, 600, autoflush=False)
 	win.setBackground(color_rgb(108, 86, 120))
 
-	msgBox = Rectangle(Point(50, 50), Point(550, 500))
+	msgBox = Rectangle(Point(50, 25), Point(550, 500))
 	msgBox.setFill("white")
 	msgBox.setOutline("black")
 	msgBox.draw(win)
@@ -89,6 +89,8 @@ def chatWin(username):
 	msgSendText.draw(win)
 
 	oldRecieved = RECIEVED.copy()
+	drawnSenders = []
+	drawnContents = []
 
 	Thread(target=waitForMsg, args=(server,)).start()
 
@@ -107,13 +109,32 @@ def chatWin(username):
 		if oldRecieved == RECIEVED:
 			pass
 		else:
-			try:
-				newMsg.undraw()
-			except:
-				pass
 			oldRecieved = RECIEVED.copy()
-			newMsg = Text(Point(300, 300), RECIEVED[-1])
-			newMsg.draw(win)
+			newMsg = RECIEVED[-1]
+
+			for i in range(len(drawnSenders)):
+				try:
+					drawnSenders[i].undraw()
+					drawnContents[i].undraw()
+				except:
+					pass
+
+			for i in reversed(range(len(RECIEVED))):
+				sender = RECIEVED[i][0:RECIEVED[i].find(" ")]
+				msgContent = RECIEVED[i][RECIEVED[i].find(" ")+1:]
+
+				senderText = Text(Point(300, 450+25*2*(i-len(RECIEVED)+1)), sender)
+				if sender == "Server:":
+					senderText.setTextColor("orange")
+				else:
+					senderText.setTextColor("blue")
+				senderText.draw(win)
+
+				msgContentText = Text(Point(300, 475+25*2*(i-len(RECIEVED)+1)), msgContent)
+				msgContentText.draw(win)
+
+				drawnSenders.append(senderText)
+				drawnContents.append(msgContentText)
 
 
 
@@ -138,7 +159,7 @@ def waitForMsg(server):
 			continue
 		else:
 			RECIEVED.append(msg)
-			if len(RECIEVED) > 10:
+			if len(RECIEVED) > 9:
 				RECIEVED.pop(0)
 
 if __name__ == "__main__":
