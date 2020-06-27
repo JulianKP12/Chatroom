@@ -4,13 +4,13 @@ from connection import Connection
 
 CLIENTS = {}
 
-host = "localhost"
+host = "0.0.0.0"
 port = 5432
 server = socket(AF_INET, SOCK_STREAM)
 server.bind((host, port))
 print("[DEBUG] Server started")
 
-CLIENTS["Server"] = Connection("server", "Server", ("123.12.1.12", 69420))
+CLIENTS["Server"] = Connection("server", "Server", ("123.45.6.789", 42069))
 
 
 def waitForCon(server):
