@@ -3,6 +3,12 @@
 Just a little quick demo of using sockets to create a simple chatroom
 
 
+### Installation:
+
+just clone the client.exe file and run it, that's all there is to it!
+The connection.py and server.py files aren't necessary to run the exe
+
+
 ### Bugs:
 
 There's a whole lot of bugs with this version and it'll be really easy to break the chatbox,
