@@ -58,7 +58,7 @@ def main():
 
 
 def chatWin(username):
-	host = "82.72.90.35"
+	host = "IP GOES HERE"
 	port = 5432
 	server = socket(AF_INET, SOCK_STREAM)
 	server.connect((host, port))
